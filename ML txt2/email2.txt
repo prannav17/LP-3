@@ -1,0 +1,48 @@
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
+
+# 1. Load Dataset
+data = pd.read_csv('/content/emails.csv')
+
+# Display the first few rows and column names to identify columns
+print(data.head())
+print(data.columns)
+
+# Assuming the last column 'Prediction' is the label (1 for Spam, 0 for Not Spam)
+# and the remaining columns (starting after 'Email No.') contain extracted features
+X = data.iloc[:, 1:-1].values  # Features (all columns except 'Email No.' and 'Prediction')
+y = data['Prediction'].values  # Target variable (Spam or Not Spam)
+
+# 2. Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 3. K-Nearest Neighbors (KNN) Model
+knn = KNeighborsClassifier(n_neighbors=5)  # Adjust k as needed
+knn.fit(X_train, y_train)
+y_pred_knn = knn.predict(X_test)
+
+# 4. Support Vector Machine (SVM) Model
+svm = SVC(kernel='linear')  # Linear kernel for text classification
+svm.fit(X_train, y_train)
+y_pred_svm = svm.predict(X_test)
+
+# 5. Evaluation Metrics
+def evaluate_model(y_test, y_pred, model_name):
+    print(f"--- {model_name} Evaluation ---")
+    print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
+    print(f"Precision: {precision_score(y_test, y_pred):.4f}")
+    print(f"Recall: {recall_score(y_test, y_pred):.4f}")
+    print(f"F1 Score: {f1_score(y_test, y_pred):.4f}")
+    print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+    print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# Evaluate KNN
+evaluate_model(y_test, y_pred_knn, "K-Nearest Neighbors")
+
+# Evaluate SVM
+evaluate_model(y_test, y_pred_svm, "Support Vector Machine")

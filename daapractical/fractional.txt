@@ -1,0 +1,225 @@
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Scanner;
+
+class Item {
+    int value, weight;
+
+    Item(int value, int weight) {
+        this.value = value;
+        this.weight = weight;
+    }
+}
+
+public class FractionalKnapsack {
+    private static double getMaxValue(Item[] items, int capacity) {
+        Arrays.sort(items, new Comparator<Item>() {
+            @Override
+            public int compare(Item o1, Item o2) {
+                double r1 = (double) o1.value / o1.weight;
+                double r2 = (double) o2.value / o2.weight;
+                return Double.compare(r2, r1);
+            }
+        });
+
+        double totalValue = 0;
+
+        for (Item item : items) {
+            if (capacity - item.weight >= 0) {
+                capacity -= item.weight;
+                totalValue += item.value;
+            } else {
+                totalValue += item.value * ((double) capacity / item.weight);
+                break;
+            }
+        }
+        return totalValue;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of items: ");
+        int n = scanner.nextInt();
+
+        Item[] items = new Item[n];
+
+        for (int i = 0; i < n; i++) {
+            System.out.print("Enter value and weight for item " + (i + 1) + ": ");
+            int value = scanner.nextInt();
+            int weight = scanner.nextInt();
+            items[i] = new Item(value, weight);
+        }
+
+        System.out.print("Enter the capacity of the knapsack: ");
+        int capacity = scanner.nextInt();
+
+        double maxValue = getMaxValue(items, capacity);
+        System.out.println("Maximum value we can obtain = " + maxValue);
+    }
+}
+
+
+//    Enter the number of items: 3
+//        Enter value and weight for item 1: 60 10
+//        Enter value and weight for item 2: 100 20
+//        Enter value and weight for item 3: 120 30
+//        Enter the capacity of the knapsack: 50
+//        Maximum value we can obtain = 240.0
+
+
+
+
+//fraction using greedy
+import java.util.*;
+
+// Item class to represent each item (value, weight, and value-to-weight ratio)
+class Item {
+    int value, weight;
+    
+    // Constructor to initialize value and weight of an item
+    public Item(int value, int weight) {
+        this.value = value;
+        this.weight = weight;
+    }
+}
+
+public class FractionalKnapsack {
+
+    // Function to solve the Fractional Knapsack problem using Greedy method
+    public static double fractionalKnapsack(int capacity, Item[] items, int n) {
+        // Calculate the value-to-weight ratio for each item and store it in a list
+        Item[] itemList = new Item[n];
+        for (int i = 0; i < n; i++) {
+            itemList[i] = items[i];
+        }
+
+        // Sort items based on the value/weight ratio in descending order
+        Arrays.sort(itemList, (a, b) -> Double.compare(b.value * 1.0 / b.weight, a.value * 1.0 / a.weight));
+
+        double totalValue = 0.0; // To keep track of the total value in the knapsack
+        for (int i = 0; i < n; i++) {
+            // If the item can be fully added to the knapsack
+            if (itemList[i].weight <= capacity) {
+                capacity -= itemList[i].weight;
+                totalValue += itemList[i].value;
+            }
+            // Otherwise, take the fraction of the item that can fit
+            else {
+                totalValue += itemList[i].value * ((double) capacity / itemList[i].weight);
+                break; // Knapsack is full
+            }
+        }
+
+        return totalValue;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Input the number of items
+        System.out.print("Enter the number of items: ");
+        int n = scanner.nextInt();
+
+        // Input the value and weight of each item
+        Item[] items = new Item[n];
+        System.out.println("Enter the value and weight of each item:");
+        for (int i = 0; i < n; i++) {
+            System.out.print("Item " + (i + 1) + " value: ");
+            int value = scanner.nextInt();
+            System.out.print("Item " + (i + 1) + " weight: ");
+            int weight = scanner.nextInt();
+            items[i] = new Item(value, weight);
+        }
+
+        // Input the capacity of the knapsack
+        System.out.print("Enter the capacity of the knapsack: ");
+        int capacity = scanner.nextInt();
+
+        // Solve the Fractional Knapsack problem
+        double maxValue = fractionalKnapsack(capacity, items, n);
+
+        // Output the result
+        System.out.println("Maximum value in the knapsack = " + maxValue);
+
+        scanner.close();
+    }
+}
+Enter the number of items: 3
+Enter the value and weight of each item:
+Item 1 value: 60
+Item 1 weight: 10
+Item 2 value: 100
+Item 2 weight: 20
+Item 3 value: 120
+Item 3 weight: 30
+Enter the capacity of the knapsack: 50
+
+
+
+
+
+//python
+# Item class to represent each item with its value, weight, and value-to-weight ratio
+class Item:
+    def __init__(self, value, weight):
+        self.value = value
+        self.weight = weight
+        self.ratio = value / weight  # Calculate the value-to-weight ratio
+
+# Function to solve the fractional knapsack problem
+def fractional_knapsack(capacity, items):
+    # Sort items based on value-to-weight ratio in descending order
+    items.sort(key=lambda x: x.ratio, reverse=True)
+
+    total_value = 0.0  # To store the total value of knapsack
+    for item in items:
+        if capacity == 0:
+            break
+
+        # If the item can be completely added to the knapsack
+        if item.weight <= capacity:
+            total_value += item.value
+            capacity -= item.weight
+        else:
+            # Take the fraction of the item that fits
+            total_value += item.value * (capacity / item.weight)
+            capacity = 0  # Knapsack is full
+
+    return total_value
+
+# Main function to get user input and solve the problem
+def main():
+    # Input the number of items
+    n = int(input("Enter the number of items: "))
+    
+    items = []
+    
+    # Input the value and weight of each item
+    for i in range(n):
+        value = float(input(f"Enter value of item {i+1}: "))
+        weight = float(input(f"Enter weight of item {i+1}: "))
+        items.append(Item(value, weight))
+    
+    # Input the capacity of the knapsack
+    capacity = float(input("Enter the capacity of the knapsack: "))
+    
+    # Solve the fractional knapsack problem
+    max_value = fractional_knapsack(capacity, items)
+    
+    # Output the maximum value
+    print(f"The maximum value that can be obtained in the knapsack is: {max_value:.2f}")
+
+# Running the main function
+if __name__ == "__main__":
+    main()
+Enter the number of items: 4
+Enter value of item 1: 60
+Enter weight of item 1: 10
+Enter value of item 2: 100
+Enter weight of item 2: 20
+Enter value of item 3: 120
+Enter weight of item 3: 30
+Enter value of item 4: 80
+Enter weight of item 4: 10
+Enter the capacity of the knapsack: 50

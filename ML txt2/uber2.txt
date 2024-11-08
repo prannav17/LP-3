@@ -1,0 +1,78 @@
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+from scipy import stats
+
+# 1. Load and Pre-process the Dataset with low_memory option
+data = pd.read_csv('/content/uber.csv', low_memory=True)
+
+# Optimize data types to save memory
+for col in data.select_dtypes(include=['float64']).columns:
+    data[col] = data[col].astype('float32')
+for col in data.select_dtypes(include=['int64']).columns:
+    data[col] = data[col].astype('int32')
+
+# Drop rows with null values
+data = data.dropna()
+
+# Convert categorical data to numerical using only the top N most frequent categories
+top_n = 10  # Adjust based on dataset size and number of categories
+for col in data.select_dtypes(include=['object']).columns:
+    top_categories = data[col].value_counts().index[:top_n]
+    data[col] = np.where(data[col].isin(top_categories), data[col], 'Other')
+    data = pd.get_dummies(data, columns=[col], drop_first=True)
+
+# 2. Identify Outliers
+sns.boxplot(data['fare_amount'])
+plt.title("Outliers in Fare Amount")
+plt.show()
+
+# Removing outliers using Z-score (3 standard deviations)
+data = data[(np.abs(stats.zscore(data['fare_amount'])) < 3)]
+
+# 3. Check Correlation
+correlation_matrix = data.corr()
+sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm")
+plt.title("Correlation Matrix")
+plt.show()
+
+# Selecting features and target variable
+X = data.drop(columns=['fare_amount'])
+y = data['fare_amount']
+
+# 4. Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 5. Linear Regression Model
+lin_reg = LinearRegression()
+lin_reg.fit(X_train, y_train)
+y_pred_lin = lin_reg.predict(X_test)
+
+# 6. Random Forest Regression Model
+rf_reg = RandomForestRegressor(random_state=42, n_estimators=50, max_depth=10)  # Reduced complexity
+rf_reg.fit(X_train, y_train)
+y_pred_rf = rf_reg.predict(X_test)
+
+# 7. Evaluation Metrics
+# Linear Regression Evaluation
+rmse_lin = np.sqrt(mean_squared_error(y_test, y_pred_lin))
+r2_lin = r2_score(y_test, y_pred_lin)
+print(f"Linear Regression RMSE: {rmse_lin}")
+print(f"Linear Regression R^2 Score: {r2_lin}")
+
+# Random Forest Evaluation
+rmse_rf = np.sqrt(mean_squared_error(y_test, y_pred_rf))
+r2_rf = r2_score(y_test, y_pred_rf)
+print(f"Random Forest RMSE: {rmse_rf}")
+print(f"Random Forest R^2 Score: {r2_rf}")
+
+# Comparison of Model Scores
+print("\nComparison of Model Performance:")
+print(f"Linear Regression - RMSE: {rmse_lin}, R^2: {r2_lin}")
+print(f"Random Forest - RMSE: {rmse_rf}, R^2: {r2_rf}")

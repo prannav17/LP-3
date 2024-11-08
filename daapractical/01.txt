@@ -1,0 +1,202 @@
+import java.util.Scanner;
+
+public class    Knapsack {
+    static int max(int a, int b) {
+        return (a > b) ? a : b;
+    }
+
+    static int knapSack(int W, int wt[], int val[], int n) {
+        int i, w;
+        int K[][] = new int[n + 1][W + 1];
+
+        for (i = 0; i <= n; i++) {
+            for (w = 0; w <= W; w++) {
+                if (i == 0 || w == 0)
+                    K[i][w] = 0;
+                else if (wt[i - 1] <= w)
+                    K[i][w] = max(val[i - 1] + K[i - 1][w - wt[i - 1]], K[i - 1][w]);
+                else
+                    K[i][w] = K[i - 1][w];
+            }
+        }
+        return K[n][W];
+    }
+
+    public static void main(String args[]) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of items: ");
+        int n = scanner.nextInt();
+
+        int[] val = new int[n];
+        int[] wt = new int[n];
+
+        System.out.println("Enter the values of the items:");
+        for (int i = 0; i < n; i++) {
+            val[i] = scanner.nextInt();
+        }
+
+        System.out.println("Enter the weights of the items:");
+        for (int i = 0; i < n; i++) {
+            wt[i] = scanner.nextInt();
+        }
+
+        System.out.print("Enter the maximum weight capacity of the knapsack: ");
+        int W = scanner.nextInt();
+
+        System.out.println("Maximum value in Knapsack = " + knapSack(W, wt, val, n));
+
+        scanner.close(); // Close the scanner
+    }
+}
+
+
+
+//    Enter the number of items: 3
+//        Enter the values of the items:
+//        60
+//        100
+//        120
+//        Enter the weights of the items:
+//        10
+//        20
+//        30
+//        Enter the maximum weight capacity of the knapsack: 50
+//        Maximum value in Knapsack = 220
+
+
+
+
+
+
+//dp
+import java.util.Scanner;
+
+public class Knapsack {
+
+    // Function to solve the 0-1 Knapsack problem using Dynamic Programming
+    public static int knapsack(int[] values, int[] weights, int capacity, int n) {
+        // Create a DP table where dp[i][w] represents the maximum value for the first i items and weight w
+        int[][] dp = new int[n + 1][capacity + 1];
+
+        // Build the DP table
+        for (int i = 0; i <= n; i++) {
+            for (int w = 0; w <= capacity; w++) {
+                if (i == 0 || w == 0) {
+                    dp[i][w] = 0; // Base case: no items or 0 capacity
+                } else if (weights[i - 1] <= w) {
+                    // If the item can be included, take the maximum of including or excluding it
+                    dp[i][w] = Math.max(values[i - 1] + dp[i - 1][w - weights[i - 1]], dp[i - 1][w]);
+                } else {
+                    // If the item cannot be included, exclude it
+                    dp[i][w] = dp[i - 1][w];
+                }
+            }
+        }
+
+        // The maximum value will be in the bottom-right cell of the DP table
+        return dp[n][capacity];
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Input the number of items
+        System.out.print("Enter the number of items: ");
+        int n = scanner.nextInt();
+
+        // Input the weight and value of each item
+        int[] values = new int[n];
+        int[] weights = new int[n];
+
+        System.out.println("Enter the values and weights of the items:");
+        for (int i = 0; i < n; i++) {
+            System.out.print("Item " + (i + 1) + " value: ");
+            values[i] = scanner.nextInt();
+            System.out.print("Item " + (i + 1) + " weight: ");
+            weights[i] = scanner.nextInt();
+        }
+
+        // Input the knapsack capacity
+        System.out.print("Enter the capacity of the knapsack: ");
+        int capacity = scanner.nextInt();
+
+        // Solve the 0-1 Knapsack problem
+        int maxValue = knapsack(values, weights, capacity, n);
+
+        // Output the result
+        System.out.println("The maximum value that can be obtained is: " + maxValue);
+
+        scanner.close();
+    }
+}
+
+
+
+
+Enter the number of items: 4
+Enter the values and weights of the items:
+Item 1 value: 60
+Item 1 weight: 10
+Item 2 value: 100
+Item 2 weight: 20
+Item 3 value: 120
+Item 3 weight: 30
+Item 4 value: 80
+Item 4 weight: 10
+Enter the capacity of the knapsack: 50
+
+
+
+
+//python
+def knapsack(weights, values, capacity, n):
+    # Create a 2D array to store the maximum value at each (i, w) combination
+    dp = [[0 for _ in range(capacity + 1)] for _ in range(n + 1)]
+
+    # Fill the dp table
+    for i in range(n + 1):
+        for w in range(capacity + 1):
+            if i == 0 or w == 0:
+                dp[i][w] = 0
+            elif weights[i - 1] <= w:
+                # Item can be included, choose the maximum of including or excluding it
+                dp[i][w] = max(dp[i - 1][w], values[i - 1] + dp[i - 1][w - weights[i - 1]])
+            else:
+                # Item cannot be included
+                dp[i][w] = dp[i - 1][w]
+
+    # The last entry contains the maximum value for the full knapsack
+    return dp[n][capacity]
+
+def main():
+    # User input for the number of items
+    n = int(input("Enter the number of items: "))
+    
+    # User input for weights and values
+    weights = []
+    values = []
+    
+    for i in range(n):
+        value, weight = map(int, input(f"Enter value and weight for item {i+1} (value weight): ").split())
+        values.append(value)
+        weights.append(weight)
+    
+    # User input for knapsack capacity
+    capacity = int(input("Enter the knapsack capacity: "))
+    
+    # Solve the 0-1 knapsack problem using dynamic programming
+    result = knapsack(weights, values, capacity, n)
+    
+    # Output the result
+    print(f"The maximum value in the knapsack is: {result}")
+
+if __name__ == "__main__":
+    main()
+Enter the number of items: 4
+Enter value and weight for item 1 (value weight): 60 10
+Enter value and weight for item 2 (value weight): 100 20
+Enter value and weight for item 3 (value weight): 120 30
+Enter value and weight for item 4 (value weight): 80 15
+Enter the knapsack capacity: 50
+

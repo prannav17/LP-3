@@ -1,0 +1,146 @@
+import java.util.Scanner;
+
+public class NQueens {
+
+    // Function to print the board
+    public static void printBoard(int[][] board) {
+        int N = board.length;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (board[i][j] == 1)
+                    System.out.print("Q ");
+                else
+                    System.out.print(". ");
+            }
+            System.out.println();
+        }
+    }
+
+    // Function to check if it's safe to place a queen at position (row, col)
+    public static boolean isSafe(int[][] board, int row, int col) {
+        int N = board.length;
+
+        // Check the column
+        for (int i = 0; i < row; i++) {
+            if (board[i][col] == 1)
+                return false;
+        }
+
+        // Check the left diagonal
+        for (int i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+            if (board[i][j] == 1)
+                return false;
+        }
+
+        // Check the right diagonal
+        for (int i = row, j = col; i >= 0 && j < N; i--, j++) {
+            if (board[i][j] == 1)
+                return false;
+        }
+
+        return true;
+    }
+
+    // Backtracking function to place queens
+    public static boolean solveNQueens(int[][] board, int row) {
+        int N = board.length;
+
+        // If all queens are placed
+        if (row >= N) {
+            return true;
+        }
+
+        // Try placing the queen in all columns for this row
+        for (int col = 0; col < N; col++) {
+            if (isSafe(board, row, col)) {
+                // Place queen
+                board[row][col] = 1;
+
+                // Recur to place the rest of the queens
+                if (solveNQueens(board, row + 1)) {
+                    return true;
+                }
+
+                // Backtrack if placing queen doesn't lead to a solution
+                board[row][col] = 0;
+            }
+        }
+
+        return false;
+    }
+
+    // Main function
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Take user input for the size of the board and first queen position
+        System.out.print("Enter the size of the board (N): ");
+        int N = scanner.nextInt();
+        int[][] board = new int[N][N];
+
+        System.out.print("Enter the row and column for the first queen (0-based): ");
+        int firstRow = scanner.nextInt();
+        int firstCol = scanner.nextInt();
+
+        // Place the first queen
+        if (isSafe(board, firstRow, firstCol)) {
+            board[firstRow][firstCol] = 1;
+
+            // Start solving from the next row
+            if (solveNQueens(board, 0)) {
+                printBoard(board);
+            } else {
+                System.out.println("Solution not found.");
+            }
+        } else {
+            System.out.println("Invalid starting position for the first queen.");
+        }
+
+        scanner.close();
+    }
+}
+
+
+
+//python
+def is_safe(board, row, col, n):
+    # Check column
+    for i in range(row):
+        if board[i] == col or \
+           board[i] - i == col - row or \
+           board[i] + i == col + row:
+            return False
+    return True
+
+def solve_nqueens(board, row, n):
+    # If all queens are placed
+    if row >= n:
+        return True
+
+    # Try placing a queen in each column of the current row
+    for col in range(n):
+        if is_safe(board, row, col, n):
+            board[row] = col  # Place queen
+            if solve_nqueens(board, row + 1, n):
+                return True
+            board[row] = -1  # Backtrack
+    return False
+
+def print_board(board, n):
+    for i in range(n):
+        row = ['Q' if board[i] == j else '.' for j in range(n)]
+        print(' '.join(row))
+
+def n_queens(n):
+    board = [-1] * n  # Initialize the board with -1 (no queens placed)
+    board[0] = int(input(f"Enter the column (0 to {n-1}) to place the first queen: "))  # First Queen placed
+    
+    if solve_nqueens(board, 1, n):
+        print("Solution:")
+        print_board(board, n)
+    else:
+        print("No solution exists.")
+
+# Get user input for n (size of the board)
+n = int(input("Enter the number of queens (n): "))
+n_queens(n)

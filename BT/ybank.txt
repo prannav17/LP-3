@@ -1,0 +1,50 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract BankAccount {
+    address public owner;
+    mapping(address => uint) private balances;
+
+    // Event to log deposits
+    event Deposited(address indexed account, uint amount);
+
+    // Event to log withdrawals
+    event Withdrawn(address indexed account, uint amount);
+
+    // Modifier to ensure only the owner can execute some actions (e.g., withdraw from the contract)
+    modifier onlyOwner() {
+        require(msg.sender == owner, "You are not the owner");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender; // Set the owner of the contract as the account deploying the contract
+    }
+
+    // Deposit money into the account
+    function deposit() external payable {
+        require(msg.value > 0, "You must send some Ether to deposit");
+        balances[msg.sender] += msg.value;
+        emit Deposited(msg.sender, msg.value);
+    }
+
+    // Withdraw money from the account
+    function withdraw(uint _amount) external {
+        require(_amount > 0, "Amount must be greater than 0");
+        require(balances[msg.sender] >= _amount, "Insufficient funds");
+
+        balances[msg.sender] -= _amount;
+        payable(msg.sender).transfer(_amount);
+        emit Withdrawn(msg.sender, _amount);
+    }
+
+    // Show balance of the account
+    function getBalance() external view returns (uint) {
+        return balances[msg.sender];
+    }
+
+    // Function to check the contract's balance (this is optional)
+    function getContractBalance() external view onlyOwner returns (uint) {
+        return address(this).balance;
+    }
+}

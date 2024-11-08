@@ -1,0 +1,31 @@
+# Import numpy for numerical operations
+import numpy as np
+
+# Define the function and its derivative
+def function(x):
+    return (x + 3) ** 2
+
+def derivative(x):
+    return 2 * (x + 3)
+
+# Gradient Descent parameters
+x = 2               # Starting point
+learning_rate = 0.1 # Step size
+tolerance = 1e-6    # Convergence criteria
+max_iterations = 1000
+
+# Gradient Descent loop
+for iteration in range(max_iterations):
+    grad = derivative(x)
+    x_new = x - learning_rate * grad  # Update x
+
+    # Check if the change in x is below the tolerance level
+    if abs(x_new - x) < tolerance:
+        break
+
+    x = x_new  # Update x for next iteration
+
+# Output the result
+print("Local minimum at x:", x)
+print("Function value at local minimum y:", function(x))
+print("Number of iterations:", iteration + 1)
