@@ -1,0 +1,221 @@
+# DAA 4 - 0-1 Knapsack Problem using Dynamic Programming
+
+import java.util.PriorityQueue;
+import java.util.Comparator;
+import java.util.Scanner;
+
+
+class Node {
+    int level, profit, weight;
+    double bound;
+
+    public Node(int level, int profit, int weight, double bound) {
+        this.level = level;
+        this.profit = profit;
+        this.weight = weight;
+        this.bound = bound;
+    }
+}
+
+
+class NodeComparator implements Comparator<Node> {
+    @Override
+    public int compare(Node a, Node b) {
+        // Max-Heap based on bound value
+        if (a.bound > b.bound)
+            return -1;
+        else if (a.bound < b.bound)
+            return 1;
+        return 0;
+    }
+}
+
+public class KnapsackBB {
+
+    static double calculateBound(Node node, int n, int capacity, int[] values, int[] weights) {
+        if (node.weight >= capacity) {
+            return 0;
+        }
+
+        double profitBound = node.profit;
+        int j = node.level + 1;
+        int totalWeight = node.weight;
+
+
+        while (j < n && totalWeight + weights[j] <= capacity) {
+            totalWeight += weights[j];
+            profitBound += values[j];
+            j++;
+        }
+
+
+        if (j < n) {
+            profitBound += (capacity - totalWeight) * ((double) values[j] / weights[j]);
+        }
+
+        return profitBound;
+    }
+
+
+    public static int knapsackBB(int[] values, int[] weights, int capacity) {
+        int n = values.length;
+
+
+        PriorityQueue<Node> pq = new PriorityQueue<>(new NodeComparator());
+
+
+        Integer[] items = new Integer[n];
+        for (int i = 0; i < n; i++) {
+            items[i] = i;
+        }
+
+
+        java.util.Arrays.sort(items, (i, j) -> Double.compare((double) values[j] / weights[j], (double) values[i] / weights[i]));
+
+
+        int[] sortedValues = new int[n];
+        int[] sortedWeights = new int[n];
+        for (int i = 0; i < n; i++) {
+            sortedValues[i] = values[items[i]];
+            sortedWeights[i] = weights[items[i]];
+        }
+
+
+        Node u = new Node(-1, 0, 0, 0);
+        Node v = new Node(0, 0, 0, 0);
+        u.bound = calculateBound(u, n, capacity, sortedValues, sortedWeights);
+        pq.add(u);
+
+        int maxProfit = 0;
+
+
+        while (!pq.isEmpty()) {
+            u = pq.poll();
+
+
+            if (u.bound > maxProfit) {
+
+                v.level = u.level + 1;
+
+                v.weight = u.weight + sortedWeights[v.level];
+                v.profit = u.profit + sortedValues[v.level];
+
+                if (v.weight <= capacity && v.profit > maxProfit) {
+                    maxProfit = v.profit;
+                }
+
+
+                v.bound = calculateBound(v, n, capacity, sortedValues, sortedWeights);
+                if (v.bound > maxProfit) {
+                    pq.add(new Node(v.level, v.profit, v.weight, v.bound));
+                }
+
+
+                v.weight = u.weight;
+                v.profit = u.profit;
+                v.bound = calculateBound(v, n, capacity, sortedValues, sortedWeights);
+                if (v.bound > maxProfit) {
+                    pq.add(new Node(v.level, v.profit, v.weight, v.bound));
+                }
+            }
+        }
+
+        return maxProfit;
+    }
+
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+
+        System.out.print("Enter the number of items: ");
+        int n = sc.nextInt();
+
+        int[] values = new int[n];
+        int[] weights = new int[n];
+
+
+        for (int i = 0; i < n; i++) {
+            System.out.print("Enter value for item " + (i + 1) + ": ");
+            values[i] = sc.nextInt();
+            System.out.print("Enter weight for item " + (i + 1) + ": ");
+            weights[i] = sc.nextInt();
+        }
+
+
+        System.out.print("Enter the capacity of the knapsack: ");
+        int capacity = sc.nextInt();
+
+
+        int maxProfit = knapsackBB(values, weights, capacity);
+        System.out.println("Maximum profit in knapsack = " + maxProfit);
+
+        sc.close();
+    }
+}
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+// BT Student Data
+
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.7.0 <0.8.0;
+
+// Build the Contract
+contract MarksManagmtSys {
+    // Create a structure for student details
+    struct Student {
+        int ID;
+        string fName;
+        string lName;
+        int marks;
+    }
+
+    // Owner of the contract
+    address owner;
+
+    // Public student count
+    int public stdCount = 0;
+
+    // Mapping to store student records
+    mapping(int => Student) public stdRecords;
+
+    // Modifier to allow only the owner to execute certain functions
+    modifier onlyOwner {
+        require(owner == msg.sender, "Only the contract owner can execute this");
+        _;
+    }
+
+    // Constructor to set the contract deployer as the owner
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // Function to add new records
+    function addNewRecords(
+        int _ID,
+        string memory _fName,
+        string memory _lName,
+        int _marks
+    ) public onlyOwner {
+        // Increase the student count by 1
+        stdCount = stdCount + 1;
+
+        // Add the new student record to the mapping
+        stdRecords[stdCount] = Student(_ID, _fName, _lName, _marks);
+    }
+
+    // Function to add bonus marks to the latest student record
+    function bonusMarks(int _bonus) public onlyOwner {
+        // Ensure there is at least one student before adding bonus marks
+        require(stdCount > 0, "No student records available");
+
+        // Add bonus marks to the last student's record
+        stdRecords[stdCount].marks = stdRecords[stdCount].marks + _bonus;
+    }
+}

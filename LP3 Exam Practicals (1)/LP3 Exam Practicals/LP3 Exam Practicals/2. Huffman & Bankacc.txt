@@ -1,0 +1,155 @@
+# DAA 2 - Huffman Coding (Using Greedy Approach)
+
+import java.util.PriorityQueue;
+import java.util.Scanner;
+
+class HuffmanNode {
+    int data;
+    char c;
+    HuffmanNode left;
+    HuffmanNode right;
+}
+
+class MyComparator implements java.util.Comparator<HuffmanNode> {
+    public int compare(HuffmanNode x, HuffmanNode y) {
+        return x.data - y.data;
+    }
+}
+
+public class Huffman {
+    public static void printCode(HuffmanNode root, String s) {
+        if (root.left == null && root.right == null && Character.isLetter(root.c)) {
+            System.out.println(root.c + ":" + s);
+            return;
+        }
+        printCode(root.left, s + "0");
+        printCode(root.right, s + "1");
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Get number of characters
+        System.out.print("Enter the number of characters: ");
+        int n = sc.nextInt();
+        sc.nextLine(); // Consume newline
+
+        char[] charArray = new char[n];
+        int[] charfreq = new int[n];
+
+        // Take user input for characters and frequencies
+        for (int i = 0; i < n; i++) {
+            System.out.print("Enter character " + (i + 1) + ": ");
+            charArray[i] = sc.nextLine().charAt(0);
+            System.out.print("Enter frequency for character '" + charArray[i] + "': ");
+            charfreq[i] = sc.nextInt();
+            sc.nextLine(); // Consume newline
+        }
+
+        PriorityQueue<HuffmanNode> q = new PriorityQueue<HuffmanNode>(n, new MyComparator());
+
+        // Create and add nodes to the priority queue
+        for (int i = 0; i < n; i++) {
+            HuffmanNode hn = new HuffmanNode();
+            hn.c = charArray[i];
+            hn.data = charfreq[i];
+            hn.left = null;
+            hn.right = null;
+            q.add(hn);
+        }
+
+        HuffmanNode root = null;
+
+        // Build the Huffman tree
+        while (q.size() > 1) {
+            HuffmanNode x = q.peek();
+            q.poll();
+            HuffmanNode y = q.peek();
+            q.poll();
+            HuffmanNode f = new HuffmanNode();
+            f.data = x.data + y.data;
+            f.c = '-';
+            f.left = x;
+            f.right = y;
+            root = f;
+            q.add(f);
+        }
+
+        // Print the codes
+        printCode(root, "");
+
+        sc.close();
+    }
+}
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+// BT Bank 
+
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.6.0;
+
+contract banking {
+    mapping(address => uint) public user_account;
+    mapping(address => bool) public user_exists;
+
+    function create_account() public payable returns(string memory) {
+        require(user_exists[msg.sender] == false, 'Account already created');
+        
+        if (msg.value == 0) {
+            user_account[msg.sender] = 0;
+            user_exists[msg.sender] = true;
+            return "Account created";
+        }
+
+        require(user_exists[msg.sender] == false, "Account already created");
+        user_account[msg.sender] = msg.value;
+        user_exists[msg.sender] = true;
+        return "Account created";
+    }
+
+    function deposit() public payable returns(string memory) {
+        require(user_exists[msg.sender] == true, "Account not created");
+        require(msg.value > 0, "Value for deposit is Zero");
+        user_account[msg.sender] = user_account[msg.sender] + msg.value;
+        return "Deposited Successfully";
+    }
+
+    function withdraw(uint amount) public payable returns(string memory) {
+        require(user_account[msg.sender] > amount, "Insufficient Balance");
+        require(user_exists[msg.sender] == true, "Account not created");
+        require(amount > 0, "Amount should be more than zero");
+        user_account[msg.sender] = user_account[msg.sender] - amount;
+        msg.sender.transfer(amount);
+        return "Withdrawal Successful";
+    }
+
+    function transfer(address payable userAddress, uint amount) public returns(string memory) {
+        require(user_account[msg.sender] > amount, "Insufficient balance in Bank account");
+        require(user_exists[msg.sender] == true, "Account is not created");
+        require(user_exists[userAddress] == true, "Transfer account does not exist");
+        require(amount > 0, "Amount should be more than zero");
+        user_account[msg.sender] = user_account[msg.sender] - amount;
+        user_account[userAddress] = user_account[userAddress] + amount;
+        return "Transfer Successful";
+    }
+
+    function send_amt(address payable toAddress, uint256 amount) public payable returns(string memory) {
+        require(user_account[msg.sender] > amount, "Insufficient balance in Bank account");
+        require(user_exists[msg.sender] == true, "Account is not created");
+        require(amount > 0, "Amount should be more than zero");
+        user_account[msg.sender] = user_account[msg.sender] - amount;
+        toAddress.transfer(amount);
+        return "Transfer Success";
+    }
+
+    function user_balance() public view returns(uint) {
+        return user_account[msg.sender];
+    }
+
+    function account_exist() public view returns(bool) {
+        return user_exists[msg.sender];
+    }
+}
+
